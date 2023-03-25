@@ -1,0 +1,121 @@
+version: "3.9"
+services:
+  control_service:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    hostname: control_service
+    container_name: control_service
+    depends_on:
+      kafka:
+        condition: service_healthy
+    ports:
+      - "8000:8000"
+    environment:
+      - MY_NAME="Spiderweb Control"
+    env_file:
+      - .env
+    volumes:
+      - ./:/home/app
+    networks:
+      - my-net
+
+  spidey_1:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    hostname: spidey_1
+    container_name: spidey_1
+    depends_on:
+      kafka:
+        condition: service_healthy
+    ports:
+      - "8001:8000"
+    environment:
+      - MY_NAME=Tobey Maguire
+    env_file:
+      - .env
+    volumes:
+      - ./:/home/app
+    networks:
+      - my-net
+
+  spidey_2:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    hostname: spidey_2
+    container_name: spidey_2
+    depends_on:
+      kafka:
+        condition: service_healthy
+    ports:
+      - "8002:8000"
+    environment:
+      - MY_NAME=Andrew Garfield
+    env_file:
+      - .env
+    volumes:
+      - ./:/home/app
+    networks:
+      - my-net
+
+  spidey_3:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    hostname: spidey_3
+    container_name: spidey_3
+    depends_on:
+      kafka:
+        condition: service_healthy
+    ports:
+      - "8003:8000"
+    environment:
+      - MY_NAME=Tom Holland
+    env_file:
+      - .env
+    volumes:
+      - ./:/home/app
+    networks:
+      - my-net
+
+  kafka-ui:
+    image: provectuslabs/kafka-ui
+    container_name: kafka-ui
+    ports:
+      - "8080:8080"
+    restart: always
+    environment:
+      - KAFKA_CLUSTERS_0_NAME=local
+      - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=kafka:29092
+    networks:
+      - my-net
+
+  kafka:
+    image: obsidiandynamics/kafka
+    container_name: kafka
+    restart: "no"
+    ports:
+      - "2181:2181"
+      - "9093:9093"
+    environment:
+      KAFKA_LISTENERS: "INTERNAL://:29092,EXTERNAL://:9093"
+      KAFKA_ADVERTISED_LISTENERS: "INTERNAL://kafka:29092,EXTERNAL://localhost:9093"
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: "INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT"
+      KAFKA_INTER_BROKER_LISTENER_NAME: "INTERNAL"
+      KAFKA_ZOOKEEPER_SESSION_TIMEOUT: "6000"
+      KAFKA_RESTART_ATTEMPTS: "10"
+      KAFKA_RESTART_DELAY: "5"
+      ZOOKEEPER_AUTOPURGE_PURGE_INTERVAL: "0"
+    healthcheck:
+      test: nc -z localhost 29092 || exit
+      interval: 10s
+      timeout: 5s
+      retries: 15
+    networks:
+      - my-net
+
+networks:
+  my-net:
+    external: true

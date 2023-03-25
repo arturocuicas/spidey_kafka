@@ -1,2 +1,6 @@
-# spidey_kafka
-FastAPI and Apache Kafka expample
+# Spidey Kafka
+FastAPI and Apache Kafka example
+
+```Shell
+docker compose up --build
+```
